@@ -1,0 +1,48 @@
+library(tidyverse)
+library(janitor)
+library(tidymodels)
+library(gtsummary)
+library(car)
+library(pscl)
+
+data("bioChemists", package = "pscl")
+bioChemists %>% str()
+hist(bioChemists$art)
+
+
+## Model a poison Regression
+model1 <- glm(art ~ . , data = bioChemists, family = 'poisson')
+summary(model1)
+
+model1 %>% 
+  tbl_regression(exp = TRUE)
+
+vif(model1)
+
+
+## Boostrap intervals
+boots <-
+  reg_intervals(art ~ . , data = bioChemists, model_fn = 'glm', family = 'poisson')
+
+
+## Zero Inflated
+model2 <- zeroinfl(art ~ . , data = bioChemists)
+summary(model2)
+
+list_coef <- list(count = model2$coefficients$count, zero = model2$coefficients$zero)
+
+
+list_coef %>% 
+  map(~ exp(.))
+
+
+## hurdle model
+model3 <- hurdle(art ~ . , data = bioChemists)
+summary(model3)
+
+
+## comparing AIC
+aic <- list(model1 = model1, model2 = model2, model3 = model3)
+
+aic %>% 
+  map(~ AIC(.))

@@ -1,0 +1,45 @@
+library(MASS)
+library(tidyverse)
+library(performance)
+library(glmmTMB)
+library(pscl)
+
+data(Salamanders)
+Salamanders
+
+## Check model assumptions
+
+model1 <- lm(mpg ~ cyl + disp, data = mtcars)
+
+
+check_normality(model1)
+check_heteroscedasticity(model1)
+check_collinearity(model1)
+
+check_model(model1)
+
+
+## Check overdispersion
+model <- glm(count ~ spp + mined, family = poisson, data = Salamanders)
+
+check_overdispersion(model)
+check_model(model)
+
+check_zeroinflation(model)
+
+## Consider negative binomial or a zero-inflated regression
+model2 <- glm.nb(count ~ spp + mined, data = Salamanders)
+
+check_model(model2)
+check_overdispersion(model2)
+
+## Zero Inflated
+model3 <- zeroinfl(count ~ spp + mined, data = Salamanders)
+
+model3
+
+
+## Logist Regression
+m2 <- glm(vs ~ wt + mpg, data = mtcars, family = "binomial")
+
+check_model(m2)

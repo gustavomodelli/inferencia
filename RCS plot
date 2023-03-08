@@ -1,0 +1,25 @@
+library(tidyverse)
+library(plotRCS)
+library(survival)
+library(survminer)
+
+cancer <- plotRCS::cancer
+
+cancer <- cancer %>% 
+  mutate(status = ifelse(status == 'Censored',0,1))
+
+## Cox Regression
+cox1 <- coxph(Surv(time, status) ~ age + sex + race + size + metastasis,
+              data = cancer)
+
+summary(cox1)
+
+
+## RCS plot
+rcsplot(
+  data = cancer,
+  outcome = 'status',
+  time = 'time',
+  exposure = 'age',
+  covariates = c('sex','race','size','metastasis')
+)
